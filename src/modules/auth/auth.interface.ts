@@ -6,3 +6,7 @@ export interface IRegisterUserRequest {
   password: string;
   role: UserRole;
 }
+export interface ILoginUserRequest {
+  email: string;
+  password: string;
+}

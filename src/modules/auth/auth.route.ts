@@ -3,7 +3,7 @@ import { AuthControllers } from './auth.controller';
 
 const router = express.Router();
 
-// 🎯 রিকোয়ারমেন্ট অনুযায়ী এন্ডপয়েন্ট: POST /api/auth/register
 router.post('/register', AuthControllers.registerNewUser);
+router.post('/login', AuthControllers.loginUser);
 
 export const AuthRoutes = router;

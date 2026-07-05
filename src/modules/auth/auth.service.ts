@@ -1,7 +1,8 @@
-import bcrypt from 'bcryptjs';
-import { prisma } from '../../lib/prisma'; 
-import { IRegisterUserRequest } from './auth.interface';
-
+import bcrypt from "bcryptjs";
+import { prisma } from "../../lib/prisma";
+import { ILoginUserRequest, IRegisterUserRequest } from "./auth.interface";
+import config from "../../config";
+import jwt from "jsonwebtoken";
 
 const registerUserIntoDB = async (payload: IRegisterUserRequest) => {
   const { name, email, password, role } = payload;
@@ -11,7 +12,7 @@ const registerUserIntoDB = async (payload: IRegisterUserRequest) => {
   });
 
   if (isUserExist) {
-    throw new Error('User already exists with this email!');
+    throw new Error("User already exists with this email!");
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -33,14 +34,14 @@ const registerUserIntoDB = async (payload: IRegisterUserRequest) => {
       },
     });
 
-    if (role === 'TECHNICIAN') {
+    if (role === "TECHNICIAN") {
       await tx.technicianProfile.create({
         data: {
           userId: newUser.id,
           skills: [],
           experience: 0,
           basePrice: 0.0,
-          location: '',
+          location: "",
           availability: [],
         },
       });
@@ -52,6 +53,54 @@ const registerUserIntoDB = async (payload: IRegisterUserRequest) => {
   return result;
 };
 
+const loginUser = async (payload: ILoginUserRequest) => {
+  const { email, password } = payload;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new Error("User does not exist with this email!");
+  }
+
+  if (user.isBanned) {
+    throw new Error("Your account has been banned by admin!");
+  }
+
+  const isPasswordMatched = await bcrypt.compare(password, user.password);
+  if (!isPasswordMatched) {
+    throw new Error("Password incorrect!");
+  }
+
+  const jwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret, {
+    expiresIn: config.jwt_access_expires_in,
+  });
+
+  const refreshToken = jwt.sign(jwtPayload, config.jwt_refresh_secret, {
+    expiresIn: config.jwt_refresh_expires_in,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  };
+};
+
 export const AuthServices = {
   registerUserIntoDB,
+  loginUser,
 };
