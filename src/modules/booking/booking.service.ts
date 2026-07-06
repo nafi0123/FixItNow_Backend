@@ -43,19 +43,17 @@ const getUserBookingsFromDB = async (userId: string, role: string) => {
   const result = await prisma.booking.findMany({
     where: whereConditions,
     include: {
-      customer: { select: { name: true, email: true } },
-      technicianProfile: {
-        include: {
-          user: { select: { name: true } }
-        }
-      }
+      customer: { 
+        select: { 
+          name: true 
+        } 
+      },
     },
     orderBy: { createdAt: 'desc' }
   });
 
   return result;
 };
-
 const getBookingDetailsFromDB = async (bookingId: string, userId: string, role: string) => {
   const result = await prisma.booking.findUnique({
     where: { id: bookingId },
