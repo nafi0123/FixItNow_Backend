@@ -10,8 +10,8 @@ model User {
 
   // Relations
   technicianProfile TechnicianProfile?
-//   bookings          Booking[]           @relation("CustomerBookings")
-//   reviews           Review[]
+  bookings          Booking[]           @relation("CustomerBookings")
+  // reviews           Review[]
 
   @@map("users")
 }
