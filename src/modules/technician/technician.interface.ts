@@ -17,3 +17,7 @@ export interface ICreateServiceRequest {
   duration: string;
   categoryId: string; 
 }
+
+export interface IUpdateBookingStatusRequest {
+  status: 'ACCEPTED' | 'DECLINED' | 'COMPLETED';
+}

@@ -102,8 +102,70 @@ const createServiceInDB = async (userId: string, payload: ICreateServiceRequest)
   return result;
 };
 
+
+const getTechnicianBookingsFromDB = async (userId: string) => {
+  const result = await prisma.booking.findMany({
+    where: {
+      technicianProfile: {
+        userId: userId, 
+      },
+    },
+    include: {
+      customer: { select: { name: true, email: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return result;
+};
+
+const updateBookingStatusInDB = async (
+  bookingId: string, 
+  userId: string, 
+  payload: { status: 'ACCEPTED' | 'DECLINED' | 'COMPLETED' }
+) => {
+  const { status } = payload;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      technicianProfile: true,
+    },
+  });
+
+  if (!booking) {
+    throw new Error('Booking not found!');
+  }
+
+  if (booking.technicianProfile.userId !== userId) {
+    throw new Error('Unauthorized! This booking does not belong to you.');
+  }
+
+  let updateData = { status };
+
+  if (status === 'ACCEPTED') {
+    console.log("Booking accepted! Ready to generate SSLCommerz Payment URL...");
+  }
+
+  if (status === 'COMPLETED') {
+    if (booking.status !== 'ACCEPTED') {
+      throw new Error('Only accepted bookings can be marked as completed!');
+    }
+  }
+
+  const result = await prisma.booking.update({
+    where: { id: bookingId },
+    data: updateData,
+  });
+
+  return result;
+};
+
 export const TechnicianServices = {
   updateProfileInDB,
   updateAvailabilityInDB,
   createServiceInDB,
+  getTechnicianBookingsFromDB, 
+  updateBookingStatusInDB,
+  
 };
