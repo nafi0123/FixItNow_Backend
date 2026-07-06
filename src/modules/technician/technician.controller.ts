@@ -27,7 +27,20 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createService = catchAsync(async (req: Request, res: Response) => {
+  const { id: userId } = (req as any).user;
+  const result = await TechnicianServices.createServiceInDB(userId, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 201,
+    message: 'Service created successfully by technician!',
+    data: result,
+  });
+});
+
 export const TechnicianControllers = {
   updateProfile,
   updateAvailability,
+  createService
 };

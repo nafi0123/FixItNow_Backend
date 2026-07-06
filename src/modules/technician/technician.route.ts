@@ -15,5 +15,9 @@ router.put(
   auth('TECHNICIAN'),
   TechnicianControllers.updateAvailability
 );
-
+router.post(
+  '/services',
+  auth('TECHNICIAN'), 
+  TechnicianControllers.createService
+);
 export const TechnicianRoutes = router;

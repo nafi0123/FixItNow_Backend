@@ -9,3 +9,11 @@ export interface IUpdateTechnicianProfile {
 export interface IUpdateTechnicianAvailability {
   availability: any; 
 }
+
+export interface ICreateServiceRequest {
+  name: string;
+  description: string;
+  price: number;
+  duration: string;
+  categoryId: string; 
+}

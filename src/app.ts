@@ -6,6 +6,7 @@ import globalErrorHandler from "./middlewares/globalErrorHandler";
 import { AuthRoutes } from "./modules/auth/auth.route";
 import { CategoryRoutes } from "./modules/admin/admin.route";
 import { TechnicianRoutes } from "./modules/technician/technician.route";
+import { PublicRoutes } from "./modules/public/public.route";
 const app : Application = express();
 
 app.use(cors({
@@ -32,6 +33,7 @@ app.get("/",(req : Request, res : Response) => {
 app.use('/api/auth', AuthRoutes);
 app.use('/api', CategoryRoutes);
 app.use('/api/technician', TechnicianRoutes);
+app.use('/api', PublicRoutes);
 
 
 app.use(globalErrorHandler)
