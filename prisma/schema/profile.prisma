@@ -12,10 +12,10 @@ model TechnicianProfile {
   updatedAt    DateTime  @updatedAt
 
 
-  // user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
 
-//   services     Service[]
+  services     Service[]
 //   bookings     Booking[]
 //   reviews      Review[]
 

@@ -1,25 +1,29 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config'; 
 import { prisma } from '../lib/prisma';
 import { catchAsync } from '../utils/catchAsync';
+import { jwtUtils } from '../utils/jwt';
 
 const auth = (...requiredRoles: string[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
+    let token = req.headers.authorization;
 
     if (!token) {
       throw new Error('You are not authorized! Token is missing.');
     }
 
-    let decoded: JwtPayload;
-    try {
-      decoded = jwt.verify(token, config.jwt_access_secret) as JwtPayload;
-    } catch (err) {
+    if (token.startsWith('Bearer ')) {
+      token = token.split(' ')[1];
+    }
+
+    const verificationResult = jwtUtils.verifyToken(token!, config.jwt_access_secret);
+
+    if (!verificationResult.success) {
       throw new Error('Unauthorized! Invalid or expired token.');
     }
 
-    const { email, role } = decoded;
+    const decoded = verificationResult.data;
+    const { email, role } = decoded as any;
 
     const user = await prisma.user.findUnique({
       where: { email },

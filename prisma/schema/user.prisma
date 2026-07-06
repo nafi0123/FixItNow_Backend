@@ -9,7 +9,7 @@ model User {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  // technicianProfile TechnicianProfile?
+  technicianProfile TechnicianProfile?
 //   bookings          Booking[]           @relation("CustomerBookings")
 //   reviews           Review[]
 

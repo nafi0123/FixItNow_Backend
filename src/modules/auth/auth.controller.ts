@@ -14,7 +14,6 @@ const registerNewUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// ২. লগইন কন্ট্রোলার
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.loginUser(req.body);
   const { accessToken, refreshToken, user } = result;
@@ -23,7 +22,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     secure: process.env.NODE_ENV === 'production', 
     httpOnly: true,
     sameSite: 'none',
-    maxAge: 30 * 24 * 60 * 60 * 1000 // ৩০ দিন
+    maxAge: 30 * 24 * 60 * 60 * 1000 
   });
 
   sendResponse(res, {
