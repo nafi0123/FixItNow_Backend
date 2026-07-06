@@ -4,7 +4,7 @@ import express, { Application, Request, Response } from "express";
 import config from "./config";
 import globalErrorHandler from "./middlewares/globalErrorHandler"; 
 import { AuthRoutes } from "./modules/auth/auth.route";
-import { CategoryRoutes } from "./modules/category/category.route";
+import { CategoryRoutes } from "./modules/admin/admin.route";
 const app : Application = express();
 
 app.use(cors({

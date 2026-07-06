@@ -1,6 +1,6 @@
 import express from 'express';
 import auth from '../../middlewares/auth';
-import { CategoryControllers } from './category.controller';
+import { CategoryControllers } from './admin.controller';
 
 const router = express.Router();
 

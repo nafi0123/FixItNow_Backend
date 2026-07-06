@@ -1,5 +1,5 @@
 import { prisma } from '../../lib/prisma';
-import { ICreateCategoryRequest, IUpdateUserStatusRequest } from './category.interface';
+import { ICreateCategoryRequest, IUpdateUserStatusRequest } from './admin.interface';
 
 const createCategoryIntoDB = async (payload: ICreateCategoryRequest) => {
   const { name, description } = payload;
