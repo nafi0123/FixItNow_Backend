@@ -99,8 +99,39 @@ const loginUser = async (payload: ILoginUserRequest) => {
     },
   };
 };
+const getMeFromDB = async (email: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isBanned: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
+  if (!user) {
+    throw new Error("User not found!");
+  }
+
+  if (user.role === "TECHNICIAN") {
+    const technicianProfile = await prisma.technicianProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    return {
+      ...user,
+      technicianProfile,
+    };
+  }
+
+  return user;
+};
 export const AuthServices = {
   registerUserIntoDB,
   loginUser,
+  getMeFromDB,
 };

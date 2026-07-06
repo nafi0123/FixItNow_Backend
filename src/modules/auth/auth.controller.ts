@@ -35,8 +35,19 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  const { email } = (req as any).user; 
+  const result = await AuthServices.getMeFromDB(email);
 
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'User profile fetched successfully!',
+    data: result,
+  });
+});
 export const AuthControllers = {
   registerNewUser,
   loginUser,
+  getMe,
 };
