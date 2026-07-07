@@ -124,7 +124,106 @@ const confirmPaymentInDB = async (data: any) => {
   }
 };
 
+const getAllPaymentsFromDB = async (userId: string, role: string) => {
+  let whereClause = {};
+
+  if (role === 'CUSTOMER') {
+    whereClause = {
+      booking: {
+        customerId: userId,
+      },
+    };
+  } else if (role === 'TECHNICIAN') {
+    whereClause = {
+      booking: {
+        technicianProfile: {
+          userId: userId,
+        },
+      },
+    };
+  }
+
+  const result = await prisma.payment.findMany({
+    where: whereClause,
+    include: {
+      booking: {
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          technicianProfile: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return result;
+};
+
+const getPaymentByIdFromDB = async (transactionId: string, userId: string, role: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: { transactionId: transactionId },
+    include: {
+      booking: {
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          technicianProfile: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new Error('Payment not found!');
+  }
+
+  if (role === 'CUSTOMER' && payment.booking.customerId !== userId) {
+    throw new Error('Unauthorized access to this payment details!');
+  }
+
+  if (role === 'TECHNICIAN' && payment.booking.technicianProfile.userId !== userId) {
+    throw new Error('Unauthorized access to this payment details!');
+  }
+
+  return payment;
+};
+
 export const PaymentServices = {
   createPaymentSessionInDB,
   confirmPaymentInDB,
+  getAllPaymentsFromDB,
+  getPaymentByIdFromDB,
 };

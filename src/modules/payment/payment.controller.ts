@@ -26,7 +26,36 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   res.status(200).send(result);
 });
 
+const getAllPayments = catchAsync(async (req: Request, res: Response) => {
+  const { id: userId, role } = (req as any).user;
+
+  const result = await PaymentServices.getAllPaymentsFromDB(userId, role);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Payment history fetched successfully!',
+    data: result,
+  });
+});
+
+const getPaymentById = catchAsync(async (req: Request, res: Response) => {
+  const { id: transactionId } = req.params;
+  const { id: userId, role } = (req as any).user;
+
+  const result = await PaymentServices.getPaymentByIdFromDB(transactionId as string, userId, role);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Payment details fetched successfully!',
+    data: result,
+  });
+});
+
 export const PaymentControllers = {
   createPaymentSession,
   confirmPayment,
+  getAllPayments,
+  getPaymentById,
 };
