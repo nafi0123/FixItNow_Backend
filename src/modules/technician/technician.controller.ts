@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { catchAsync } from '../../utils/catchAsync';
 import { sendResponse } from '../../utils/sendResponse';
-import { TechnicianServices } from './technician.service'; // 🎯 শুধুমাত্র লোকাল সার্ভিসটি ইমপোর্ট করা হয়েছে
+import { TechnicianServices } from './technician.service'; 
 
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
