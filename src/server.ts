@@ -1,5 +1,5 @@
 import "dotenv/config";
-import config from "./config";
+import config from "./config/index";
 import { prisma } from "./lib/prisma";
 import app from "./app";
 

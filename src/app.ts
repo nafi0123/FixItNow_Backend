@@ -1,7 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
-import config from "./config";
+import config from "./config/index";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 import { AuthRoutes } from "./modules/auth/auth.route";
 import { CategoryRoutes } from "./modules/admin/admin.route";

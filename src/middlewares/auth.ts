@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import config from '../config'; 
+import config from '../config/index'; 
 import { prisma } from '../lib/prisma';
 import { catchAsync } from '../utils/catchAsync';
 import { jwtUtils } from '../utils/jwt';

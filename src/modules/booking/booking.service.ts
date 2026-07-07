@@ -1,7 +1,6 @@
 import { prisma } from '../../lib/prisma';
 import { ICreateBookingRequest } from './booking.interface';
-import SSLCommerzPayment from 'sslcommerz-lts';
-import config from '../../config';
+
 
 const createBookingInDB = async (customerId: string, payload: ICreateBookingRequest) => {
   const isTechnicianExist = await prisma.technicianProfile.findUnique({
