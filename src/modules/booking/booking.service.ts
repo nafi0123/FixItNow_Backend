@@ -75,7 +75,7 @@ const getBookingDetailsFromDB = async (bookingId: string, userId: string, role: 
   const currentPaymentStatus = String(result.paymentStatus).toUpperCase().trim();
   const currentUserRole = String(role).toUpperCase().trim();
 
-  if (currentStatus === 'ACCEPTED' && currentPaymentStatus === 'UNPAID' && currentUserRole === 'CUSTOMER') {
+  if (currentStatus === 'ACCEPTED' && (currentPaymentStatus === 'UNPAID' || currentPaymentStatus === 'FAILED') && currentUserRole === 'CUSTOMER') {
     
     const transactionId = `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const paymentAmount = Number(result.technicianProfile?.basePrice) || 500; 

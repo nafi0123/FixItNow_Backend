@@ -16,7 +16,7 @@ const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleTechnician = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await PublicServices.getSingleTechnicianFromDB(id);
+  const result = await PublicServices.getSingleTechnicianFromDB(id as string);
 
   sendResponse(res, {
     success: true,
