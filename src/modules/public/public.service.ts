@@ -43,7 +43,6 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
 
   return result;
 };
-
 const getSingleTechnicianFromDB = async (id: string) => {
   const result = await prisma.technicianProfile.findUnique({
     where: { id },
@@ -52,6 +51,19 @@ const getSingleTechnicianFromDB = async (id: string) => {
         select: {
           name: true,
           email: true,
+        },
+      },
+      reviews: {
+        include: {
+          customer: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc', 
         },
       },
     },
