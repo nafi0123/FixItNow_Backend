@@ -18,7 +18,6 @@ const createPaymentSession = catchAsync(async (req: Request, res: Response) => {
 });
 
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
-  // 🎯 ফিক্স: কুয়েরি এবং বডি অবজেক্ট মার্জ করে পাঠানো হলো যাতে ডেটা মিস না হয়
   const paymentData = { ...req.query, ...req.body };
   const result = await PaymentServices.confirmPaymentInDB(paymentData);
   

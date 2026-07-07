@@ -1,17 +1,18 @@
 model User {
-  id          String    @id @default(uuid())
-  name        String    @db.VarChar(255)
-  email       String    @unique
-  password    String
-  role        UserRole  @default(CUSTOMER)
-  isBanned    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  email     String   @unique
+  password  String
+  role      UserRole @default(CUSTOMER)
+  isBanned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   technicianProfile TechnicianProfile?
-  bookings          Booking[]           @relation("CustomerBookings")
+  bookings          Booking[]          @relation("CustomerBookings")
   // reviews           Review[]
+  reviews           Review[]
 
   @@map("users")
 }

@@ -1,17 +1,19 @@
 model Booking {
-  id                  String            @id @default(uuid())
+  id                  String   @id @default(uuid())
   customerId          String
   technicianProfileId String
   bookingDate         DateTime
   slot                String
-  status              String            @default("PENDING")
-  paymentStatus       String            @default("UNPAID") 
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  status              String   @default("PENDING")
+  paymentStatus       String   @default("UNPAID")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   customer          User              @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
   technicianProfile TechnicianProfile @relation(fields: [technicianProfileId], references: [id], onDelete: Cascade)
-  
-  payment           Payment?          
+
+  payment Payment?
+  review  Review?
+
   @@map("bookings")
 }

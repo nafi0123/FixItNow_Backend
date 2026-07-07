@@ -9,6 +9,7 @@ import { TechnicianRoutes } from "./modules/technician/technician.route";
 import { PublicRoutes } from "./modules/public/public.route";
 import { BookingRoutes } from "./modules/booking/booking.route";
 import { PaymentRoutes } from "./modules/payment/payment.route";
+import { ReviewRoutes } from "./modules/review/review.route";
 const app: Application = express();
 
 app.use(
@@ -34,6 +35,7 @@ app.use("/api/technician", TechnicianRoutes);
 app.use("/api", PublicRoutes);
 app.use("/api/bookings", BookingRoutes);
 app.use("/api/payments", PaymentRoutes);
+app.use("/api/reviews", ReviewRoutes);
 app.use(globalErrorHandler);
 
 export default app;
