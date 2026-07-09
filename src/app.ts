@@ -10,6 +10,7 @@ import { PublicRoutes } from "./modules/public/public.route";
 import { BookingRoutes } from "./modules/booking/booking.route";
 import { PaymentRoutes } from "./modules/payment/payment.route";
 import { ReviewRoutes } from "./modules/review/review.route";
+import { notFound } from "./middlewares/notFound";
 const app: Application = express();
 
 app.use(
@@ -36,6 +37,13 @@ app.use("/api", PublicRoutes);
 app.use("/api/bookings", BookingRoutes);
 app.use("/api/payments", PaymentRoutes);
 app.use("/api/reviews", ReviewRoutes);
+
+
+app.use(notFound);
+
+
+
+
 app.use(globalErrorHandler);
 
 export default app;
