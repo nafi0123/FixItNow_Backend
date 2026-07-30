@@ -28,13 +28,44 @@ const createCategoryIntoDB = async (payload: ICreateCategoryRequest) => {
   return result;
 };
 
-const getAllCategoriesFromDB = async () => {
+const getAllCategoriesFromDB = async (query: Record<string, any> = {}) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const search = (query.searchTerm || query.search || '') as string;
+
+  const whereConditions: any = {};
+
+  if (search) {
+    whereConditions.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
   const result = await prisma.category.findMany({
+    where: whereConditions,
     orderBy: {
-      createdAt: 'desc', 
+      createdAt: 'desc',
     },
+    skip,
+    take: limit,
   });
-  return result;
+
+  const total = await prisma.category.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };
 
 
