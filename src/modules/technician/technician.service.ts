@@ -34,10 +34,23 @@ const updateProfileInDB = async (
     }
   }
 
-  // গ) সব ঠিক থাকলে ডাটা আপডেট
+  const updateData: any = {};
+
+  if (payload.bio !== undefined) updateData.bio = payload.bio;
+  if (payload.location !== undefined) updateData.location = payload.location;
+  if (payload.skills !== undefined) updateData.skills = payload.skills;
+  if (payload.experience !== undefined) updateData.experience = payload.experience;
+  if (payload.experienceYears !== undefined) updateData.experience = payload.experienceYears;
+
+  if (payload.basePrice !== undefined) {
+    updateData.basePrice = payload.basePrice;
+  } else if (payload.hourlyRate !== undefined) {
+    updateData.basePrice = payload.hourlyRate;
+  }
+
   const result = await prisma.technicianProfile.update({
     where: { userId },
-    data: payload,
+    data: updateData,
   });
 
   return result;
@@ -45,7 +58,7 @@ const updateProfileInDB = async (
 
 const updateAvailabilityInDB = async (
   userId: string,
-  payload: IUpdateTechnicianAvailability,
+  payload: any,
 ) => {
   const isProfileExist = await prisma.technicianProfile.findUnique({
     where: { userId },
@@ -55,10 +68,17 @@ const updateAvailabilityInDB = async (
     throw new Error("Technician profile not found!");
   }
 
+  let availabilityData: any;
+  if (payload && payload.availability !== undefined) {
+    availabilityData = payload.availability;
+  } else {
+    availabilityData = payload;
+  }
+
   const result = await prisma.technicianProfile.update({
     where: { userId },
     data: {
-      availability: payload.availability as Prisma.InputJsonValue,
+      availability: availabilityData as Prisma.InputJsonValue,
     },
   });
 
@@ -108,11 +128,24 @@ const getTechnicianBookingsFromDB = async (userId: string, query: Record<string,
   const limit = Number(query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const whereConditions = {
+  const search = (query.searchTerm || query.search || '') as string;
+
+  const whereConditions: any = {
     technicianProfile: {
       userId: userId,
     },
   };
+
+  if (search) {
+    whereConditions.AND = [
+      {
+        OR: [
+          { customer: { name: { contains: search, mode: 'insensitive' } } },
+          { customer: { email: { contains: search, mode: 'insensitive' } } },
+        ],
+      },
+    ];
+  }
 
   const result = await prisma.booking.findMany({
     where: whereConditions,

@@ -33,6 +33,8 @@ const formatTechnicianSkills = async (technicians: any[]) => {
       ...tech,
       skills: resolvedSkills,
       rating: computedRating,
+      hourlyRate: tech.basePrice,
+      experienceYears: tech.experience,
     };
   });
 };

@@ -2,7 +2,9 @@ export interface IUpdateTechnicianProfile {
   bio?: string;
   skills?: string[];
   experience?: number;
+  experienceYears?: number;
   basePrice?: number;
+  hourlyRate?: number;
   location?: string;
 }
 
