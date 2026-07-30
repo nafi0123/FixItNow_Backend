@@ -106,13 +106,13 @@ const createServiceInDB = async (userId: string, payload: ICreateServiceRequest)
     data: {
       name: payload.name,
       description: payload.description,
-      price: payload.price, 
-      duration: payload.duration, 
-      
+      price: payload.price,
+      duration: payload.duration,
+
       category: {
         connect: { id: payload.categoryId }
       },
-      
+
       technicianProfile: {
         connect: { id: technicianProfile.id }
       }
@@ -151,6 +151,13 @@ const getTechnicianBookingsFromDB = async (userId: string, query: Record<string,
     where: whereConditions,
     include: {
       customer: { select: { name: true, email: true } },
+      technicianProfile: {
+        select: {
+          basePrice: true,
+          location: true,
+          user: { select: { name: true, email: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
     skip,
@@ -173,8 +180,8 @@ const getTechnicianBookingsFromDB = async (userId: string, query: Record<string,
 };
 
 const updateBookingStatusInDB = async (
-  bookingId: string, 
-  userId: string, 
+  bookingId: string,
+  userId: string,
   payload: { status: 'ACCEPTED' | 'DECLINED' | 'COMPLETED' }
 ) => {
   const { status } = payload;
@@ -281,6 +288,6 @@ export const TechnicianServices = {
   createServiceInDB,
   updateServiceInDB,
   deleteServiceFromDB,
-  getTechnicianBookingsFromDB, 
+  getTechnicianBookingsFromDB,
   updateBookingStatusInDB,
 };

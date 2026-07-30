@@ -30,7 +30,7 @@ const getUserBookings = catchAsync(async (req: Request, res: Response) => {
 const getBookingDetails = catchAsync(async (req: Request, res: Response) => {
   const { id: bookingId } = req.params;
   const { id: userId, role } = (req as any).user;
-  
+
   const result = await BookingServices.getBookingDetailsFromDB(bookingId as string, userId, role);
 
   sendResponse(res, {
