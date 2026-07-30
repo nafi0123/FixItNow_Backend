@@ -26,13 +26,14 @@ const getAllCategories = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryServices.getAllUsersFromDB();
+  const result = await CategoryServices.getAllUsersFromDB(req.query);
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
     message: "Users fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

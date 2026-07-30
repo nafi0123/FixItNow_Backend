@@ -38,8 +38,29 @@ const getAllCategoriesFromDB = async () => {
 };
 
 
-const getAllUsersFromDB = async () => {
+const getAllUsersFromDB = async (query: Record<string, any> = {}) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const search = (query.searchTerm || query.search || '') as string;
+  const role = query.role as string;
+
+  const whereConditions: any = {};
+
+  if (search) {
+    whereConditions.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  if (role) {
+    whereConditions.role = role.toUpperCase();
+  }
+
   const result = await prisma.user.findMany({
+    where: whereConditions,
     select: {
       id: true,
       name: true,
@@ -48,13 +69,28 @@ const getAllUsersFromDB = async () => {
       isBanned: true,
       createdAt: true,
       updatedAt: true,
-      technicianProfile: true, 
+      technicianProfile: true,
     },
     orderBy: {
       createdAt: 'desc',
     },
+    skip,
+    take: limit,
   });
-  return result;
+
+  const total = await prisma.user.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };
 
 const updateUserStatusInDB = async (id: string, payload: IUpdateUserStatusRequest) => {
