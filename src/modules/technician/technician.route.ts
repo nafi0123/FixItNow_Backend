@@ -1,7 +1,6 @@
 import express from 'express';
 import auth from '../../middlewares/auth';
 import { TechnicianControllers } from './technician.controller';
-import { BookingControllers } from '../booking/booking.controller';
 
 const router = express.Router();
 
@@ -16,11 +15,25 @@ router.put(
   auth('TECHNICIAN'),
   TechnicianControllers.updateAvailability
 );
+
 router.post(
   '/services',
   auth('TECHNICIAN'), 
   TechnicianControllers.createService
 );
+
+router.put(
+  '/services/:id',
+  auth('TECHNICIAN'),
+  TechnicianControllers.updateService
+);
+
+router.delete(
+  '/services/:id',
+  auth('TECHNICIAN'),
+  TechnicianControllers.deleteService
+);
+
 router.get(
   '/bookings', 
   auth('TECHNICIAN'), 
@@ -32,4 +45,5 @@ router.patch(
   auth('TECHNICIAN'), 
   TechnicianControllers.updateBookingStatus
 );
+
 export const TechnicianRoutes = router;

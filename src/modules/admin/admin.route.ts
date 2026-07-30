@@ -10,6 +10,18 @@ router.post(
   CategoryControllers.createCategory
 );
 
+router.put(
+  '/admin/categories/:id', 
+  auth('ADMIN'),
+  CategoryControllers.updateCategory
+);
+
+router.delete(
+  '/admin/categories/:id', 
+  auth('ADMIN'),
+  CategoryControllers.deleteCategory
+);
+
 router.get(
   '/admin/categories', 
   auth('ADMIN'), 

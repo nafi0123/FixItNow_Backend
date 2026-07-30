@@ -28,6 +28,51 @@ const createCategoryIntoDB = async (payload: ICreateCategoryRequest) => {
   return result;
 };
 
+const updateCategoryInDB = async (id: string, payload: Partial<ICreateCategoryRequest>) => {
+  const isCategoryExist = await prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!isCategoryExist) {
+    throw new Error('Category not found!');
+  }
+
+  const updateData: any = {};
+  if (payload.name) {
+    updateData.name = payload.name;
+    updateData.slug = payload.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+  }
+  if (payload.description !== undefined) {
+    updateData.description = payload.description;
+  }
+
+  const result = await prisma.category.update({
+    where: { id },
+    data: updateData,
+  });
+
+  return result;
+};
+
+const deleteCategoryFromDB = async (id: string) => {
+  const isCategoryExist = await prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!isCategoryExist) {
+    throw new Error('Category not found!');
+  }
+
+  const result = await prisma.category.delete({
+    where: { id },
+  });
+
+  return result;
+};
+
 const getAllCategoriesFromDB = async (query: Record<string, any> = {}) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
@@ -67,7 +112,6 @@ const getAllCategoriesFromDB = async (query: Record<string, any> = {}) => {
     data: result,
   };
 };
-
 
 const getAllUsersFromDB = async (query: Record<string, any> = {}) => {
   const page = Number(query.page) || 1;
@@ -152,6 +196,8 @@ const updateUserStatusInDB = async (id: string, payload: IUpdateUserStatusReques
 
 export const CategoryServices = {
   createCategoryIntoDB,
+  updateCategoryInDB,
+  deleteCategoryFromDB,
   getAllCategoriesFromDB,
   getAllUsersFromDB,
   updateUserStatusInDB,

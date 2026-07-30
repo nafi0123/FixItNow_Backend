@@ -181,11 +181,73 @@ const updateBookingStatusInDB = async (
   return result;
 };
 
+const updateServiceInDB = async (serviceId: string, userId: string, payload: Partial<ICreateServiceRequest>) => {
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    include: { technicianProfile: true },
+  });
+
+  if (!service) {
+    throw new Error('Service not found!');
+  }
+
+  if (service.technicianProfile.userId !== userId) {
+    throw new Error('Unauthorized! You can only update your own service.');
+  }
+
+  if (payload.categoryId) {
+    const isCategoryExist = await prisma.category.findUnique({
+      where: { id: payload.categoryId },
+    });
+    if (!isCategoryExist) {
+      throw new Error('Invalid Category ID!');
+    }
+  }
+
+  const result = await prisma.service.update({
+    where: { id: serviceId },
+    data: {
+      ...(payload.name && { name: payload.name }),
+      ...(payload.description && { description: payload.description }),
+      ...(payload.price && { price: payload.price }),
+      ...(payload.duration && { duration: payload.duration }),
+      ...(payload.categoryId && { categoryId: payload.categoryId }),
+    },
+    include: {
+      category: true,
+    },
+  });
+
+  return result;
+};
+
+const deleteServiceFromDB = async (serviceId: string, userId: string) => {
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    include: { technicianProfile: true },
+  });
+
+  if (!service) {
+    throw new Error('Service not found!');
+  }
+
+  if (service.technicianProfile.userId !== userId) {
+    throw new Error('Unauthorized! You can only delete your own service.');
+  }
+
+  const result = await prisma.service.delete({
+    where: { id: serviceId },
+  });
+
+  return result;
+};
+
 export const TechnicianServices = {
   updateProfileInDB,
   updateAvailabilityInDB,
   createServiceInDB,
+  updateServiceInDB,
+  deleteServiceFromDB,
   getTechnicianBookingsFromDB, 
   updateBookingStatusInDB,
-  
 };

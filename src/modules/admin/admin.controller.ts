@@ -14,6 +14,30 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await CategoryServices.updateCategoryInDB(id as string, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Category updated successfully!",
+    data: result,
+  });
+});
+
+const deleteCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await CategoryServices.deleteCategoryFromDB(id as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Category deleted successfully!",
+    data: result,
+  });
+});
+
 const getAllCategories = catchAsync(async (req: Request, res: Response) => {
   const result = await CategoryServices.getAllCategoriesFromDB(req.query);
 
@@ -55,6 +79,8 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 
 export const CategoryControllers = {
   createCategory,
+  updateCategory,
+  deleteCategory,
   getAllCategories,
   getAllUsers,
   updateUserStatus,

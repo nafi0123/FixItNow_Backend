@@ -39,6 +39,32 @@ const createService = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateService = catchAsync(async (req: Request, res: Response) => {
+  const { id: serviceId } = req.params;
+  const { id: userId } = (req as any).user;
+  const result = await TechnicianServices.updateServiceInDB(serviceId as string, userId, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Service updated successfully!',
+    data: result,
+  });
+});
+
+const deleteService = catchAsync(async (req: Request, res: Response) => {
+  const { id: serviceId } = req.params;
+  const { id: userId } = (req as any).user;
+  const result = await TechnicianServices.deleteServiceFromDB(serviceId as string, userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Service deleted successfully!',
+    data: result,
+  });
+});
+
 const getTechnicianBookings = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.getTechnicianBookingsFromDB(userId, req.query);
@@ -70,6 +96,8 @@ export const TechnicianControllers = {
   updateProfile,
   updateAvailability,
   createService,
+  updateService,
+  deleteService,
   getTechnicianBookings,
   updateBookingStatus,
 };
