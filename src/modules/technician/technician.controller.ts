@@ -41,13 +41,14 @@ const createService = catchAsync(async (req: Request, res: Response) => {
 
 const getTechnicianBookings = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
-  const result = await TechnicianServices.getTechnicianBookingsFromDB(userId);
+  const result = await TechnicianServices.getTechnicianBookingsFromDB(userId, req.query);
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
     message: "Technician's bookings fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

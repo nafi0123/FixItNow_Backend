@@ -2,6 +2,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { PublicServices } from "./public.service";
 import { Request, Response } from "express";
+
 const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
   const filters = req.query;
   const result = await PublicServices.getAllTechniciansFromDB(filters);
@@ -10,7 +11,8 @@ const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: 200,
     message: "Technicians fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 
@@ -34,17 +36,21 @@ const getAllServices = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: 200,
     message: "Services fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
+
 const getAllCategories = catchAsync(async (req: Request, res: Response) => {
-  const result = await PublicServices.getAllCategoriesFromDB();
+  const filters = req.query;
+  const result = await PublicServices.getAllCategoriesFromDB(filters);
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
     message: "Categories fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

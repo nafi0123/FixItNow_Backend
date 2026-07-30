@@ -1,10 +1,11 @@
 import { prisma } from "../../lib/prisma";
-import { IServiceFilterRequest, ITechnicianFilterRequest } from "./public.interface";
+import { IServiceFilterRequest, ITechnicianFilterRequest, ICategoryFilterRequest } from "./public.interface";
 
 type TechnicianWhereInput = NonNullable<Parameters<typeof prisma.technicianProfile.findMany>[0]>["where"];
 type ServiceWhereInput = NonNullable<Parameters<typeof prisma.service.findMany>[0]>["where"];
+type CategoryWhereInput = NonNullable<Parameters<typeof prisma.category.findMany>[0]>["where"];
 
-// Helper function to map category UUIDs in skills to category names
+// Helper function to map category UUIDs in skills to category names & calculate computed rating
 const formatTechnicianSkills = async (technicians: any[]) => {
   const categories = await prisma.category.findMany();
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
@@ -14,7 +15,6 @@ const formatTechnicianSkills = async (technicians: any[]) => {
       return categoryMap.get(skill) || skill;
     });
 
-    // Also include category names from technician's services if available
     if (tech.services && Array.isArray(tech.services)) {
       tech.services.forEach((s: any) => {
         if (s.category?.name && !resolvedSkills.includes(s.category.name)) {
@@ -23,16 +23,26 @@ const formatTechnicianSkills = async (technicians: any[]) => {
       });
     }
 
+    let computedRating = tech.rating;
+    if ((!computedRating || computedRating === 0) && tech.reviews && tech.reviews.length > 0) {
+      const avg = tech.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / tech.reviews.length;
+      computedRating = parseFloat(avg.toFixed(1));
+    }
+
     return {
       ...tech,
       skills: resolvedSkills,
+      rating: computedRating,
     };
   });
 };
 
 const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
   const { searchTerm, location, rating, skills } = filters;
-  
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 10;
+  const skip = (page - 1) * limit;
+
   const whereConditions: TechnicianWhereInput = {};
 
   if (searchTerm) {
@@ -46,8 +56,11 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
     whereConditions.location = { contains: location, mode: 'insensitive' };
   }
 
-  if (rating) {
-    whereConditions.rating = { gte: parseFloat(rating) };
+  if (rating && !isNaN(parseFloat(String(rating)))) {
+    const parsedRating = parseFloat(String(rating));
+    if (parsedRating > 0) {
+      whereConditions.rating = { gte: parsedRating };
+    }
   }
 
   if (skills) {
@@ -68,11 +81,32 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
           category: true,
         },
       },
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
     },
-    orderBy: { rating: 'desc' }, 
+    orderBy: { rating: 'desc' },
+    skip,
+    take: limit,
   });
 
-  return await formatTechnicianSkills(result);
+  const total = await prisma.technicianProfile.count({
+    where: whereConditions,
+  });
+
+  const formattedData = await formatTechnicianSkills(result);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit) || 1,
+    },
+    data: formattedData,
+  };
 };
 
 const getSingleTechnicianFromDB = async (id: string) => {
@@ -116,7 +150,10 @@ const getSingleTechnicianFromDB = async (id: string) => {
 
 const getAllServicesFromDB = async (filters: IServiceFilterRequest) => {
   const { searchTerm, categoryId } = filters;
-  
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 10;
+  const skip = (page - 1) * limit;
+
   const whereConditions: ServiceWhereInput = {};
 
   if (searchTerm) {
@@ -142,18 +179,62 @@ const getAllServicesFromDB = async (filters: IServiceFilterRequest) => {
         },
       },
     },
+    skip,
+    take: limit,
   });
 
-  return result;
+  const total = await prisma.service.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit) || 1,
+    },
+    data: result,
+  };
 };
 
-const getAllCategoriesFromDB = async () => {
+const getAllCategoriesFromDB = async (filters: ICategoryFilterRequest = {}) => {
+  const search = filters.searchTerm || filters.search || "";
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const whereConditions: CategoryWhereInput = {};
+
+  if (search) {
+    whereConditions.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
   const result = await prisma.category.findMany({
+    where: whereConditions,
     orderBy: {
       name: 'asc', 
     },
+    skip,
+    take: limit,
   });
-  return result;
+
+  const total = await prisma.category.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit) || 1,
+    },
+    data: result,
+  };
 };
 
 export const PublicServices = {
