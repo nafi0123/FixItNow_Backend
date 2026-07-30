@@ -4,6 +4,32 @@ import { IServiceFilterRequest, ITechnicianFilterRequest } from "./public.interf
 type TechnicianWhereInput = NonNullable<Parameters<typeof prisma.technicianProfile.findMany>[0]>["where"];
 type ServiceWhereInput = NonNullable<Parameters<typeof prisma.service.findMany>[0]>["where"];
 
+// Helper function to map category UUIDs in skills to category names
+const formatTechnicianSkills = async (technicians: any[]) => {
+  const categories = await prisma.category.findMany();
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+  return technicians.map((tech) => {
+    const resolvedSkills = (tech.skills || []).map((skill: string) => {
+      return categoryMap.get(skill) || skill;
+    });
+
+    // Also include category names from technician's services if available
+    if (tech.services && Array.isArray(tech.services)) {
+      tech.services.forEach((s: any) => {
+        if (s.category?.name && !resolvedSkills.includes(s.category.name)) {
+          resolvedSkills.push(s.category.name);
+        }
+      });
+    }
+
+    return {
+      ...tech,
+      skills: resolvedSkills,
+    };
+  });
+};
+
 const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
   const { searchTerm, location, rating, skills } = filters;
   
@@ -37,12 +63,18 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilterRequest) => {
           email: true,
         },
       },
+      services: {
+        include: {
+          category: true,
+        },
+      },
     },
     orderBy: { rating: 'desc' }, 
   });
 
-  return result;
+  return await formatTechnicianSkills(result);
 };
+
 const getSingleTechnicianFromDB = async (id: string) => {
   const result = await prisma.technicianProfile.findUnique({
     where: { id },
@@ -51,6 +83,11 @@ const getSingleTechnicianFromDB = async (id: string) => {
         select: {
           name: true,
           email: true,
+        },
+      },
+      services: {
+        include: {
+          category: true,
         },
       },
       reviews: {
@@ -73,7 +110,8 @@ const getSingleTechnicianFromDB = async (id: string) => {
     throw new Error('Technician not found!');
   }
 
-  return result;
+  const formatted = await formatTechnicianSkills([result]);
+  return formatted[0];
 };
 
 const getAllServicesFromDB = async (filters: IServiceFilterRequest) => {
@@ -108,6 +146,7 @@ const getAllServicesFromDB = async (filters: IServiceFilterRequest) => {
 
   return result;
 };
+
 const getAllCategoriesFromDB = async () => {
   const result = await prisma.category.findMany({
     orderBy: {
@@ -116,6 +155,7 @@ const getAllCategoriesFromDB = async () => {
   });
   return result;
 };
+
 export const PublicServices = {
     getAllTechniciansFromDB,
     getSingleTechnicianFromDB,
