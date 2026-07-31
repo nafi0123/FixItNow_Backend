@@ -31,13 +31,36 @@ const createBookingInDB = async (customerId: string, payload: ICreateBookingRequ
   return result;
 };
 
-const getUserBookingsFromDB = async (userId: string, role: string) => {
+const getUserBookingsFromDB = async (userId: string, role: string, query: Record<string, any> = {}) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const search = (query.searchTerm || query.search || '') as string;
+  const status = query.status as string;
+
   const whereConditions: any = {};
 
   if (role === 'CUSTOMER') {
     whereConditions.customerId = userId;
   } else if (role === 'TECHNICIAN') {
     whereConditions.technicianProfile = { userId: userId };
+  }
+
+  if (status && status !== 'ALL') {
+    whereConditions.status = status;
+  }
+
+  if (search) {
+    whereConditions.AND = [
+      {
+        OR: [
+          { slot: { contains: search, mode: 'insensitive' } },
+          { technicianProfile: { user: { name: { contains: search, mode: 'insensitive' } } } },
+          { technicianProfile: { user: { email: { contains: search, mode: 'insensitive' } } } },
+        ],
+      },
+    ];
   }
 
   const result = await prisma.booking.findMany({
@@ -50,10 +73,24 @@ const getUserBookingsFromDB = async (userId: string, role: string) => {
         }
       }
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take: limit,
   });
 
-  return result;
+  const total = await prisma.booking.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit) || 1,
+    },
+    result,
+  };
 };
 
 const getBookingDetailsFromDB = async (bookingId: string, userId: string, role: string) => {

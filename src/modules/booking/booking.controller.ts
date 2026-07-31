@@ -17,12 +17,13 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
 
 const getUserBookings = catchAsync(async (req: Request, res: Response) => {
   const { id: userId, role } = (req as any).user;
-  const result = await BookingServices.getUserBookingsFromDB(userId, role);
+  const { result, meta } = await BookingServices.getUserBookingsFromDB(userId, role, req.query);
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
     message: 'Bookings fetched successfully!',
+    meta,
     data: result,
   });
 });
