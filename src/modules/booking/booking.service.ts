@@ -61,7 +61,11 @@ const getBookingDetailsFromDB = async (bookingId: string, userId: string, role: 
     where: { id: bookingId },
     include: {
       customer: { select: { name: true, email: true } },
-      technicianProfile: true,
+      technicianProfile: {
+        include: {
+          user: { select: { name: true, email: true } }
+        }
+      },
     }
   });
 
