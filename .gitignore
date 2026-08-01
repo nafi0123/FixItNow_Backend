@@ -1,7 +1,8 @@
 node_modules
 .env
-
-/generated/prisma
 dist
-
 .vercel
+
+# Prisma generated client
+generated
+src/generated

@@ -2,6 +2,28 @@ import SSLCommerzPayment from "sslcommerz-lts";
 import config from "../../config/index";
 import { prisma } from "../../lib/prisma";
 
+const getFrontendUrl = () => {
+  const envUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL;
+  if (envUrl && !envUrl.includes("localhost")) {
+    return envUrl.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return "https://frontend-five-sand-57.vercel.app";
+  }
+  return (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+};
+
+const getBackendUrl = () => {
+  const envUrl = process.env.BACKEND_API_URL || process.env.BACKEND_URL;
+  if (envUrl && !envUrl.includes("localhost")) {
+    return envUrl.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return "https://fix-it-now-brown.vercel.app";
+  }
+  return "http://localhost:5001";
+};
+
 const createPaymentSessionInDB = async (
   customerId: string,
   bookingId: string,
@@ -34,14 +56,19 @@ const createPaymentSessionInDB = async (
   const transactionId = `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const paymentAmount = booking.technicianProfile.basePrice || 500;
 
+  const bUrl = getBackendUrl();
+  const successUrl = `${bUrl}/api/payments/confirm?status=success&tranId=${transactionId}&bookingId=${bookingId}`;
+  const failUrl = `${bUrl}/api/payments/confirm?status=fail&tranId=${transactionId}&bookingId=${bookingId}`;
+  const cancelUrl = `${bUrl}/api/payments/confirm?status=cancel&tranId=${transactionId}&bookingId=${bookingId}`;
+
   const data = {
     total_amount: paymentAmount,
     currency: "BDT",
     tran_id: transactionId,
-    success_url: `${config.ssl.success_url}&tranId=${transactionId}&bookingId=${bookingId}`,
-    fail_url: `${config.ssl.fail_url}&tranId=${transactionId}&bookingId=${bookingId}`,
-    cancel_url: config.ssl.cancel_url,
-    ipn_url: "https://fix-it-now-brown.vercel.app/api/payments/ipn",
+    success_url: successUrl,
+    fail_url: failUrl,
+    cancel_url: cancelUrl,
+    ipn_url: `${bUrl}/api/payments/ipn`,
     shipping_method: "NO",
     product_name: "Technician Service",
     product_category: "Service",
@@ -97,7 +124,7 @@ const confirmPaymentInDB = async (data: any) => {
   const tranId = data.tranId || data.tran_id;
   const bookingId = data.bookingId;
 
-  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || process.env.APP_URL || "http://localhost:3000";
+  const frontendUrl = getFrontendUrl();
 
   if (status === "success" || status === "VALID") {
     if (tranId && bookingId) {

@@ -13,9 +13,29 @@ import { ReviewRoutes } from "./modules/review/review.route";
 import { notFound } from "./middlewares/notFound";
 const app: Application = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://frontend-five-sand-57.vercel.app",
+  "https://fix-it-now-brown.vercel.app",
+  config.app_url,
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: config.app_url,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, "");
+      const isAllowed = allowedOrigins.some((o) => {
+        if (!o) return false;
+        const cleanO = o.replace(/\/$/, "");
+        return cleanOrigin === cleanO || cleanOrigin.endsWith(".vercel.app");
+      });
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
   }),
 );
