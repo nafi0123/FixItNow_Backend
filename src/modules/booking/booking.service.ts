@@ -71,7 +71,8 @@ const getUserBookingsFromDB = async (userId: string, role: string, query: Record
         include: {
           user: { select: { name: true, email: true } }
         }
-      }
+      },
+      review: true,
     },
     orderBy: { createdAt: 'desc' },
     skip,
@@ -103,6 +104,7 @@ const getBookingDetailsFromDB = async (bookingId: string, userId: string, role: 
           user: { select: { name: true, email: true } }
         }
       },
+      review: true,
     }
   });
 

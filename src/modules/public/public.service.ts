@@ -24,9 +24,9 @@ const formatTechnicianSkills = async (technicians: any[]) => {
     }
 
     let computedRating = tech.rating;
-    if ((!computedRating || computedRating === 0) && tech.reviews && tech.reviews.length > 0) {
-      const avg = tech.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / tech.reviews.length;
-      computedRating = parseFloat(avg.toFixed(1));
+    if (tech.reviews && tech.reviews.length > 0) {
+      const sum = tech.reviews.reduce((acc: number, r: any) => acc + (Number(r.rating) || 0), 0);
+      computedRating = parseFloat((sum / tech.reviews.length).toFixed(1));
     }
 
     return {
