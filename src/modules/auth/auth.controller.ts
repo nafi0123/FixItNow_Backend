@@ -46,8 +46,34 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const { email } = (req as any).user;
+  const result = await AuthServices.updateProfileInDB(email, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Profile updated successfully!',
+    data: result,
+  });
+});
+
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = (req as any).user;
+  const result = await AuthServices.changePasswordInDB(email, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Password changed successfully!',
+    data: result,
+  });
+});
+
 export const AuthControllers = {
   registerNewUser,
   loginUser,
   getMe,
+  updateProfile,
+  changePassword,
 };

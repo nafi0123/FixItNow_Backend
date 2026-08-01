@@ -11,4 +11,14 @@ router.get(
   auth('CUSTOMER', 'TECHNICIAN', 'ADMIN'),
   AuthControllers.getMe
 );
+router.patch(
+  '/update-profile',
+  auth('CUSTOMER', 'TECHNICIAN', 'ADMIN'),
+  AuthControllers.updateProfile
+);
+router.patch(
+  '/change-password',
+  auth('CUSTOMER', 'TECHNICIAN', 'ADMIN'),
+  AuthControllers.changePassword
+);
 export const AuthRoutes = router;

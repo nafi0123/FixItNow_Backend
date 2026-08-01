@@ -130,8 +130,45 @@ const getMeFromDB = async (email: string) => {
 
   return user;
 };
+const updateProfileInDB = async (email: string, payload: { name?: string }) => {
+  const user = await prisma.user.update({
+    where: { email },
+    data: { name: payload.name },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  return user;
+};
+
+const changePasswordInDB = async (
+  email: string,
+  payload: { currentPassword: string; newPassword: string }
+) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error("User not found!");
+
+  const isMatch = await bcrypt.compare(payload.currentPassword, user.password);
+  if (!isMatch) throw new Error("Current password is incorrect!");
+
+  const hashed = await bcrypt.hash(payload.newPassword, 12);
+  await prisma.user.update({
+    where: { email },
+    data: { password: hashed },
+  });
+
+  return { message: "Password changed successfully!" };
+};
+
 export const AuthServices = {
   registerUserIntoDB,
   loginUser,
   getMeFromDB,
+  updateProfileInDB,
+  changePasswordInDB,
 };
