@@ -147,6 +147,10 @@ const getTechnicianBookingsFromDB = async (userId: string, query: Record<string,
     ];
   }
 
+  if (query.status && query.status !== 'ALL') {
+    whereConditions.status = query.status;
+  }
+
   const result = await prisma.booking.findMany({
     where: whereConditions,
     include: {
