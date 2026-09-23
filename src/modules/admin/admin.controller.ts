@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { notifyNextCacheRevalidate } from "../../utils/revalidateNextCache";
 import { CategoryServices } from "./admin.service";
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await CategoryServices.createCategoryIntoDB(req.body);
+  notifyNextCacheRevalidate(["admin-categories", "public-categories"]);
 
   sendResponse(res, {
     success: true,
@@ -17,6 +19,7 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
 const updateCategory = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await CategoryServices.updateCategoryInDB(id as string, req.body);
+  notifyNextCacheRevalidate(["admin-categories", "public-categories"]);
 
   sendResponse(res, {
     success: true,
@@ -29,6 +32,7 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
 const deleteCategory = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await CategoryServices.deleteCategoryFromDB(id as string);
+  notifyNextCacheRevalidate(["admin-categories", "public-categories"]);
 
   sendResponse(res, {
     success: true,
@@ -68,6 +72,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
     id as string,
     req.body,
   );
+  notifyNextCacheRevalidate("admin-users");
 
   sendResponse(res, {
     success: true,

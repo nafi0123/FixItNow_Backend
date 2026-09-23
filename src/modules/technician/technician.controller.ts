@@ -2,10 +2,13 @@ import { Request, Response } from 'express';
 import { catchAsync } from '../../utils/catchAsync';
 import { sendResponse } from '../../utils/sendResponse';
 import { TechnicianServices } from './technician.service'; 
+import { notifyNextCacheRevalidate } from '../../utils/revalidateNextCache';
 
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.updateProfileInDB(userId, req.body);
+
+  notifyNextCacheRevalidate(["technicians", "profile", "technician-profile", "technician-overview"]);
 
   sendResponse(res, {
     success: true,
@@ -19,6 +22,8 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.updateAvailabilityInDB(userId, req.body);
 
+  notifyNextCacheRevalidate(["technicians", "profile", "technician-profile", "technician-overview"]);
+
   sendResponse(res, {
     success: true,
     statusCode: 200,
@@ -30,6 +35,8 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
 const createService = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.createServiceInDB(userId, req.body);
+
+  notifyNextCacheRevalidate(["services", "technician-overview"]);
 
   sendResponse(res, {
     success: true,
@@ -44,6 +51,8 @@ const updateService = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.updateServiceInDB(serviceId as string, userId, req.body);
 
+  notifyNextCacheRevalidate(["services", "technician-overview"]);
+
   sendResponse(res, {
     success: true,
     statusCode: 200,
@@ -56,6 +65,8 @@ const deleteService = catchAsync(async (req: Request, res: Response) => {
   const { id: serviceId } = req.params;
   const { id: userId } = (req as any).user;
   const result = await TechnicianServices.deleteServiceFromDB(serviceId as string, userId);
+
+  notifyNextCacheRevalidate(["services", "technician-overview"]);
 
   sendResponse(res, {
     success: true,
@@ -83,6 +94,16 @@ const updateBookingStatus = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = (req as any).user;
   
   const result = await TechnicianServices.updateBookingStatusInDB(bookingId as string, userId, req.body);
+
+  notifyNextCacheRevalidate([
+    "bookings",
+    "customer-bookings",
+    "technician-bookings",
+    "technician-requests",
+    "technician-overview",
+    "customer-overview",
+    "admin-overview",
+  ]);
 
   sendResponse(res, {
     success: true,

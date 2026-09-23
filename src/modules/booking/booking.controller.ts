@@ -2,10 +2,22 @@ import { Request, Response } from 'express';
 import { catchAsync } from '../../utils/catchAsync';
 import { sendResponse } from '../../utils/sendResponse';
 import { BookingServices } from './booking.service';
+import { notifyNextCacheRevalidate } from '../../utils/revalidateNextCache';
 
 const createBooking = catchAsync(async (req: Request, res: Response) => {
   const { id: customerId } = (req as any).user;
   const result = await BookingServices.createBookingInDB(customerId, req.body);
+
+  // Invalidate web caches
+  notifyNextCacheRevalidate([
+    "bookings",
+    "customer-bookings",
+    "technician-bookings",
+    "technician-requests",
+    "customer-overview",
+    "technician-overview",
+    "admin-overview",
+  ]);
 
   sendResponse(res, {
     success: true,
