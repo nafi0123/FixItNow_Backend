@@ -41,7 +41,14 @@ const auth = (...requiredRoles: string[]) => {
       throw new Error('You have no permission to access this route!');
     }
 
-    (req as any).user = decoded;
+    (req as any).user = {
+      ...(typeof decoded === 'object' ? decoded : {}),
+      id: user.id,
+      userId: user.id,
+      role: user.role,
+      email: user.email,
+      name: user.name,
+    };
     next();
   });
 };

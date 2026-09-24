@@ -215,6 +215,9 @@ const updateBookingStatusInDB = async (
     if (booking.status !== 'ACCEPTED') {
       throw new Error('Only accepted bookings can be marked as completed!');
     }
+    if (booking.paymentStatus !== 'PAID') {
+      throw new Error('Customer has not paid yet! Payment must be completed before marking this booking as completed.');
+    }
   }
 
   const result = await prisma.booking.update({

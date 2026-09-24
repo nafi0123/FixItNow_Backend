@@ -4,10 +4,10 @@ import { sendResponse } from '../../utils/sendResponse';
 import { PaymentServices } from './payment.service';
 
 const createPaymentSession = catchAsync(async (req: Request, res: Response) => {
-  const { id: customerId } = (req as any).user;
-  const { bookingId } = req.body;
+  const customerId = (req as any).user?.id || (req as any).user?.userId;
+  const { bookingId, redirectUrl } = req.body;
 
-  const result = await PaymentServices.createPaymentSessionInDB(customerId, bookingId);
+  const result = await PaymentServices.createPaymentSessionInDB(customerId, bookingId, redirectUrl);
 
   sendResponse(res, {
     success: true,
